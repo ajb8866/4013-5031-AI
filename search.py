@@ -20,6 +20,7 @@ from urllib3.util import queue
 
 import util
 
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -71,7 +72,8 @@ def tinyMazeSearch(problem):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
+
 
 def depthFirstSearch(problem: SearchProblem):
     """
@@ -125,10 +127,26 @@ def breadthFirstSearch(problem: SearchProblem):
 
     return []
 
+
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # util.raiseNotDefined()
+    uc = util.PriorityQueue()
+    uc.push((problem.getStartState(), [], 0), 0)
+    hasVisited = list()
+
+    while not uc.isEmpty():
+        current, step, existed = uc.pop()
+        if current in hasVisited:
+            continue
+        if problem.isGoalState(current):
+            return step
+        hasVisited.append(current)
+        for state, action, cost in problem.getSuccessors(current):
+            uc.push((state, step + [action], existed + cost), existed + cost)
+    return []
+
 
 def nullHeuristic(state, problem=None):
     """
@@ -137,10 +155,27 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
+
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # util.raiseNotDefined()
+
+    astar = util.PriorityQueue()
+    astar.push((problem.getStartState(), [], 0), 0)
+    hasVisited = list()
+
+    while not astar.isEmpty():
+        current, step, existed = astar.pop()
+        if current in hasVisited and hasVisited[current] <= existed:
+            continue
+        if problem.isGoalState(current):
+            return step
+
+        hasVisited[current] = existed
+        for state, action, cost in problem.getSuccessors(current):
+            astar.push((state, step + [action], existed + cost), existed + cost + heuristic(state, problem))
+    return []
 
 
 # Abbreviations
