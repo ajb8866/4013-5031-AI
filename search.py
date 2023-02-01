@@ -16,6 +16,7 @@
 In search.py, you will implement generic search algorithms which are called by
 Pacman agents (in searchAgents.py).
 """
+from urllib3.util import queue
 
 import util
 
@@ -90,15 +91,15 @@ def depthFirstSearch(problem: SearchProblem):
     # util.raiseNotDefined()
     depth = util.Stack()
     depth.push((problem.getStartState(), []))
-    hasVisted = list()
+    hasVisited = list()
 
     while not depth.isEmpty():
         current, step = depth.pop()
-        if current in hasVisted:
+        if current in hasVisited:
             continue
         if problem.isGoalState(current):
             return step
-        hasVisted.append(current)
+        hasVisited.append(current)
         for state, action, cost in problem.getSuccessors(current):
             depth.push((state, step + [action]))
     return []
@@ -113,14 +114,14 @@ def breadthFirstSearch(problem: SearchProblem):
     hasVisited = list()
 
     while not breadth.isEmpty():
-        current, step = queue.pop()
-        if current in visited:
+        current, step = breadth.pop()
+        if current in hasVisited:
             continue
         if problem.isGoalState(current):
             return step
-        hasVisted.append(current)
+        hasVisited.append(current)
         for state, action, cost in problem.getSuccessors(current):
-            queue.push((state, step + [action]))
+            breadth.push((state, step + [action]))
 
     return []
 
