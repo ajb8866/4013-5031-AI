@@ -1,3 +1,37 @@
 Insert your group number, members, and answers to the supplemental question of the project 1 here!
 
-QS1
+Averi Bates, Daniel Schnabel
+Group no. 26
+
+QS1.1:
+
+
+QS2.1:
+
+
+QS2.1:
+
+
+QS3.1:
+
+
+QS4.1:
+The Null Huristic is the UCS, it is A* without a huristic, while the Manhatten Distance is a stronger heuristic
+needing fewer steps to find the solution; but it is still admissible as it underestimates the dististance.
+
+QS4.2:
+
+
+QS5.1:
+
+
+QS5.2:
+
+
+QS6.1:
+
+
+QS7.1:
+
+
+QS8.1:
