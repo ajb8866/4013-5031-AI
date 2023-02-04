@@ -4,34 +4,73 @@ Averi Bates, Daniel Schnabel
 Group no. 26
 
 QS1.1:
+Stack
+DFS acts like a stack, examining the deepest (the last added) node before any other. A LIFO approach that visits children before neighbors.
+
+
+QS1.2:
+Yes, dfs in a tile graph like pacman will tend to go forward rather than turning, when given the choice; so it will only change direction at a dead end
+meaning it completely explores all side branches it heads into, as expected
+
+No, pacman does not go to all the explored squared because dfs has already found the correct path for him to follow
 
 
 QS2.1:
-
-
-QS2.1:
+Queue
+BFS acts like a queue, examining the next most surface level (the first added) node before any other. A FIFO approach that visits neighbors before children.
 
 
 QS3.1:
+The cost function brings on a cost of 1 (reducing pacman's score) every tile he moves by default and is taken from the getSuccessors method.
+This function can be modified to provide to penalize to varying degrees or not penalize moving in either one direction or the other.
 
 
 QS4.1:
 The Null Huristic is the UCS, it is A* without a huristic, while the Manhatten Distance is a stronger heuristic
 needing fewer steps to find the solution; but it is still admissible as it underestimates the dististance.
 
+
 QS4.2:
+A* with manhantten heuristic, BFS, and UCS follow the same optimal path, scoring 456, however UCS and BFS must search nearly the entire map, 
+while A* mostly searches the open areas on the path to the food
+
+DFS takes a horrible winding route, scoring only 212
+
+nodes expanded: 
+A*  - 535
+UCS - 682
+BFS - 682
+DFS - 576
 
 
 QS5.1:
+The state consists of pacman's position as an (x,y) tuple and a list of food locations, i.e. the corners, as a tuple of tuple (also x,y).
+This is as suggested by the problem hint.
 
 
 QS5.2:
+Takes the position and foodList variable from the state, and, removing possibilities that end in a wall and attaches the list of the available foods, 
+less the ones the are eaten if pacman shares their position (when he is in the corner) then returns the next coordinate position, list of foods, 
+direction of action [N,E,S,W], and cost function of that position in the successor object.
 
 
 QS6.1:
+We used the Manhattan Distance as our heuristic, this is an admissible heuristic as it underestimates the actual distance to the goal
+To make it consistant, the actual heuristic was the sum of manhatten distances from the position to the closest corner, to the next closest corner, etc.,
+meaning nodes would not be skipped in looking for the goal. A more accurate heuritic would find the optimal path in fewer steps, but take longer to compute
+per node; while a less accurate one would take more steps, approaching the run time of UCS. The manhatten distance was a good middle, sufficient for the project,
+and already given to us.
 
 
 QS7.1:
+The distance throught the maze to the next food is the most accurate admissible heuristic, using the given mazeDistance function.
+This will expand the fewest number of nodes, since it accuratly identifies the next best move.
+To be consistant, this is done for all food items and the furthest distance in the maze is returned as the heuristic, ensuring pacman always moves towards
+the end goal of the furthest away food. This approach beat the example in nodes seached, but took almost twice as long; as excepected from the accurate heuristic
 
 
 QS8.1:
+As BFS will find the shallowest food in the tree representation of the graph, it was called to find the path To the closest dot. The goal state is simply having
+pacmans state, be the same as the food that; using the given x,y=state and having the goal be True when it matches a food location.
+This ensures pacman will always move towards the closet goal, as the problem wants; but does not plan a head for a better future a path.
+

@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -16,7 +16,7 @@
 In search.py, you will implement generic search algorithms which are called by
 Pacman agents (in searchAgents.py).
 """
-from urllib3.util import queue
+
 
 import util
 
@@ -25,7 +25,6 @@ class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
     any of the methods (in object-oriented terminology: an abstract class).
-
     You do not need to change anything in this class, ever.
     """
 
@@ -38,7 +37,6 @@ class SearchProblem:
     def isGoalState(self, state):
         """
           state: Search state
-
         Returns True if and only if the state is a valid goal state.
         """
         util.raiseNotDefined()
@@ -46,7 +44,6 @@ class SearchProblem:
     def getSuccessors(self, state):
         """
           state: Search state
-
         For a given state, this should return a list of triples, (successor,
         action, stepCost), where 'successor' is a successor to the current
         state, 'action' is the action required to get there, and 'stepCost' is
@@ -57,7 +54,6 @@ class SearchProblem:
     def getCostOfActions(self, actions):
         """
          actions: A list of actions to take
-
         This method returns the total cost of a particular sequence of actions.
         The sequence must be composed of legal moves.
         """
@@ -78,23 +74,30 @@ def tinyMazeSearch(problem):
 def depthFirstSearch(problem: SearchProblem):
     """
     Search the deepest nodes in the search tree first.
-
     Your search algorithm needs to return a list of actions that reaches the
     goal. Make sure to implement a graph search algorithm.
-
     To get started, you might want to try some of these simple commands to
     understand the search problem that is being passed in:
-
     print("Start:", problem.getStartState())
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
     # util.raiseNotDefined()
+    '''
+    Q1
+    create a Stack data structure, populated with the start state
+    create a list of visited points
+    '''
     depth = util.Stack()
     depth.push((problem.getStartState(), []))
     hasVisited = list()
 
+    '''
+    Iterate over the the stack, ignoring previously visited points
+    push the successors and associated, point, cost, and action into the stack as a new tuple
+    return the point when the goal is reached
+    '''
     while not depth.isEmpty():
         current, step = depth.pop()
         if current in hasVisited:
@@ -111,10 +114,20 @@ def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
     # util.raiseNotDefined()
+    '''
+    Q2
+    create a Queue data structure, populated with the start state
+    create a list of visited points
+    '''
     breadth = util.Queue()
     breadth.push((problem.getStartState(), []))
     hasVisited = list()
 
+    '''
+    Iterate over the the stack, ignoring previously visited points
+    push the successors and associated, point, cost, and action into the queue as a new tuple
+    return the point when the goal is reached
+    '''
     while not breadth.isEmpty():
         current, step = breadth.pop()
         if current in hasVisited:
@@ -124,7 +137,6 @@ def breadthFirstSearch(problem: SearchProblem):
         hasVisited.append(current)
         for state, action, cost in problem.getSuccessors(current):
             breadth.push((state, step + [action]))
-
     return []
 
 
@@ -132,10 +144,23 @@ def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
     # util.raiseNotDefined()
+    '''
+    Q3
+    create a Queue that arranges elements based on a given value, i.e. a priority queue, 
+    populate it with the start state at a value of 0
+    create a list of visited points
+    '''
     uc = util.PriorityQueue()
     uc.push((problem.getStartState(), [], 0), 0)
     hasVisited = list()
 
+    '''
+    Iterate over the the Priority Queue, ignoring previously visited points
+    push the successors and associated, point, cost, value, and action into the queue as a new tuple
+    return the point when the goal is reached
+    
+    note the the value of the node is under the variable "existed"
+    '''
     while not uc.isEmpty():
         current, step, existed = uc.pop()
         if current in hasVisited:
@@ -160,11 +185,21 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
     # util.raiseNotDefined()
-
+    '''
+    Q4
+    create a Priority Queue data structure, populate it with the start state at a value of 0
+    create a list of visited points
+    '''
     a = util.PriorityQueue()
     a.push((problem.getStartState(), [], 0), 0)
     hasVisited = dict()
 
+    '''
+    Iterate over the the Priority Queue, ignoring previously visited points
+    push the successors and associated, point, cost, value, heurisitc value, and action into the queue as a new tuple
+        run the given heuristic on the state before pushing
+    return the point when the goal is reached
+    '''
     while not a.isEmpty():
         current, step, existed = a.pop()
         if current in hasVisited and hasVisited[current] <= existed:
