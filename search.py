@@ -1,9 +1,10 @@
-# search.py
-# ---------
+# multiAgents.py
+# --------------
 # Licensing Information:  You are free to use or extend these projects for
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
-# attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
+# attribution to UC Berkeley, including a link to
+# http://inst.eecs.berkeley.edu/~cs188/pacman/pacman.html
 #
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
@@ -12,209 +13,329 @@
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
-"""
-In search.py, you will implement generic search algorithms which are called by
-Pacman agents (in searchAgents.py).
-"""
+#########################
+# Angel Bergantiños Yeste#
+#########################
 
 
-import util
+from util import manhattanDistance
+from game import Directions
+import random, util
+
+from game import Agent
 
 
-class SearchProblem:
+class ReflexAgent(Agent):
     """
-    This class outlines the structure of a search problem, but doesn't implement
-    any of the methods (in object-oriented terminology: an abstract class).
-    You do not need to change anything in this class, ever.
+      A reflex agent chooses an action at each choice point by examining
+      its alternatives via a state evaluation function.
+
+      The code below is provided as a guide.  You are welcome to change
+      it in any way you see fit, so long as you don't touch our method
+      headers.
     """
 
-    def getStartState(self):
+    def getAction(self, gameState):
         """
-        Returns the start state for the search problem.
-        """
-        util.raiseNotDefined()
+        You do not need to change this method, but you're welcome to.
 
-    def isGoalState(self, state):
-        """
-          state: Search state
-        Returns True if and only if the state is a valid goal state.
-        """
-        util.raiseNotDefined()
+        getAction chooses among the best options according to the evaluation function.
 
-    def getSuccessors(self, state):
+        Just like in the previous project, getAction takes a GameState and returns
+        some Directions.X for some X in the set {North, South, West, East, Stop}
         """
-          state: Search state
-        For a given state, this should return a list of triples, (successor,
-        action, stepCost), where 'successor' is a successor to the current
-        state, 'action' is the action required to get there, and 'stepCost' is
-        the incremental cost of expanding to that successor.
-        """
-        util.raiseNotDefined()
+        # Collect legal moves and successor states
+        legalMoves = gameState.getLegalActions()
 
-    def getCostOfActions(self, actions):
+        # Choose one of the best actions
+        scores = [self.evaluationFunction(gameState, action) for action in legalMoves]
+        bestScore = max(scores)
+        bestIdx = [index for index in range(len(scores)) if scores[index] == bestScore]
+        # pick an action that is among the best
+        chosen = random.choice(bestIdx)
+
+        "Add more of your code here if you want to"
+
+        return legalMoves[chosen]
+
+    def evaluationFunction(self, currentGameState, action):
         """
-         actions: A list of actions to take
-        This method returns the total cost of a particular sequence of actions.
-        The sequence must be composed of legal moves.
+        Design a better evaluation function here.
+
+        The evaluation function takes in the current and proposed successor
+        GameStates (pacman.py) and returns a number, where higher numbers are better.
+
+        The code below extracts some useful information from the state, like the
+        remaining food (newFood) and Pacman position after moving (updatedPos).
+        scaredTimes holds the number of moves that each ghost will remain
+        scared because of Pacman having eaten a power pellet.
+
+        Print out these variables to see what you're getting, then combine them
+        to create a masterful evaluation function.
         """
-        util.raiseNotDefined()
+        # If Packman does not move
+        if action == 'Stop': return -float("inf")
+        successor = currentGameState.generatePacmanSuccessor(action)
+
+        # If Pacman moves
+        # update Pacman posistion
+        updatedPos = successor.getPacmanPosition()
+        # update ghost states
+        ghostStates = successor.getGhostStates()
+        # update how long the ghost are scared (if at all)
+        scaredTimes = [ghostState.scaredTimer for ghostState in ghostStates]
+        ghosts = len(ghostStates)
+
+        # If ghost can kill, dont move in direction of ghost
+        for i in range(ghosts):
+            if ghostStates[i].getPosition() == updatedPos and scaredTimes[i] == 0:
+                return -float("inf")
+
+        #If no killer ghost, move to closest food
+        return 1000 - min([manhattanDistance(i, updatedPos) for i in currentGameState.getFood().asList()])
 
 
-def tinyMazeSearch(problem):
+######################
+###End ReflexAgent####
+######################
+
+def scoreEvaluationFunction(currentGameState):
     """
-    Returns a sequence of moves that solves tinyMaze.  For any other maze, the
-    sequence of moves will be incorrect, so only use this for tinyMaze.
+      This default evaluation function just returns the score of the state.
+      The score is the same one displayed in the Pacman GUI.
+
+      This evaluation function is meant for use with adversarial search agents
+      (not reflex agents).
     """
-    from game import Directions
-    s = Directions.SOUTH
-    w = Directions.WEST
-    return [s, s, w, s, w, w, s, w]
+    return currentGameState.getScore()
 
 
-def depthFirstSearch(problem: SearchProblem):
+class MultiAgentSearchAgent(Agent):
     """
-    Search the deepest nodes in the search tree first.
-    Your search algorithm needs to return a list of actions that reaches the
-    goal. Make sure to implement a graph search algorithm.
-    To get started, you might want to try some of these simple commands to
-    understand the search problem that is being passed in:
-    print("Start:", problem.getStartState())
-    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
+      This class provides some common elements to all of your
+      multi-agent searchers.  Any methods defined here will be available
+      to the MinimaxPacmanAgent, AlphaBetaPacmanAgent & ExpectimaxPacmanAgent.
+
+      You *do not* need to make any changes here, but you can if you want to
+      add functionality to all your adversarial search agents.  Please do not
+      remove anything, however.
+
+      Note: this is an abstract class: one that should not be instantiated.  It's
+      only partially specified, and designed to be extended.  Agent (game.py)
+      is another abstract class.
     """
-    "*** YOUR CODE HERE ***"
-    # util.raiseNotDefined()
-    '''
-    Q1
-    create a Stack data structure, populated with the start state
-    create a list of visited points
-    '''
-    depth = util.Stack()
-    depth.push((problem.getStartState(), []))
-    hasVisited = list()
 
-    '''
-    Iterate over the the stack, ignoring previously visited points
-    push the successors and associated, point, cost, and action into the stack as a new tuple
-    return the point when the goal is reached
-    '''
-    while not depth.isEmpty():
-        current, step = depth.pop()
-        if current in hasVisited:
-            continue
-        if problem.isGoalState(current):
-            return step
-        hasVisited.append(current)
-        for state, action, cost in problem.getSuccessors(current):
-            depth.push((state, step + [action]))
-    return []
+    def __init__(self, evalFn='scoreEvaluationFunction', depth='2'):
+        self.index = 0  # Pacman is always agent index 0
+        self.evaluationFunction = util.lookup(evalFn, globals())
+        self.depth = int(depth)
 
 
-def breadthFirstSearch(problem: SearchProblem):
-    """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    # util.raiseNotDefined()
-    '''
-    Q2
-    create a Queue data structure, populated with the start state
-    create a list of visited points
-    '''
-    breadth = util.Queue()
-    breadth.push((problem.getStartState(), []))
-    hasVisited = list()
-
-    '''
-    Iterate over the the stack, ignoring previously visited points
-    push the successors and associated, point, cost, and action into the queue as a new tuple
-    return the point when the goal is reached
-    '''
-    while not breadth.isEmpty():
-        current, step = breadth.pop()
-        if current in hasVisited:
-            continue
-        if problem.isGoalState(current):
-            return step
-        hasVisited.append(current)
-        for state, action, cost in problem.getSuccessors(current):
-            breadth.push((state, step + [action]))
-    return []
-
-
-def uniformCostSearch(problem: SearchProblem):
-    """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    # util.raiseNotDefined()
-    '''
-    Q3
-    create a Queue that arranges elements based on a given value, i.e. a priority queue, 
-    populate it with the start state at a value of 0
-    create a list of visited points
-    '''
-    uc = util.PriorityQueue()
-    uc.push((problem.getStartState(), [], 0), 0)
-    hasVisited = list()
-
-    '''
-    Iterate over the the Priority Queue, ignoring previously visited points
-    push the successors and associated, point, cost, value, and action into the queue as a new tuple
-    return the point when the goal is reached
-    
-    note the the value of the node is under the variable "existed"
-    '''
-    while not uc.isEmpty():
-        current, step, existed = uc.pop()
-        if current in hasVisited:
-            continue
-        if problem.isGoalState(current):
-            return step
-        hasVisited.append(current)
-        for state, action, cost in problem.getSuccessors(current):
-            uc.push((state, step + [action], existed + cost), existed + cost)
-    return []
-
-
-def nullHeuristic(state, problem=None):
+class MinimaxAgent(MultiAgentSearchAgent):
     """
-    A heuristic function estimates the cost from the current state to the nearest
-    goal in the provided SearchProblem.  This heuristic is trivial.
+      Your minimax agent (question 2)
     """
-    return 0
+
+    def getAction(self, gameState):
+        """
+          Returns the minimax action from the current gameState using self.depth
+          and self.evaluationFunction.
+
+          Here are some method calls that might be useful when implementing minimax.
+
+          gameState.getLegalActions(agentIndex):
+            Returns a list of legal actions for an agent
+            agentIndex=0 means Pacman, ghosts are >= 1
+
+          gameState.generateSuccessor(agentIndex, action):
+            Returns the successor game state after an agent takes an action
+
+          gameState.getNumAgents():
+            Returns the total number of agents in the game
+        """
+        agents = gameState.getNumAgents()
+        depth = agents * self.depth
+        return max([(self.MiniMax(gameState.generateSuccessor(0, action), depth - 1, 1, agents), action) for action in
+                    gameState.getLegalActions(0)])[1]
+    # Calculate minmax with the current gamestate, depth of current graph, current agents, and agent amounts
+    def MiniMax(self, gameState, depth, index, agents):
+        # Evaluate current game at (if Pacman won, lost, or the is no more depth in the graph)
+        if depth == 0 or gameState.isLose() or gameState.isWin():
+            return self.evaluationFunction(gameState)
+        # Pacman agent is 0 (so not index), look for max
+        if not index:
+            return max(
+                [self.MiniMax(gameState.generateSuccessor(index, i), depth - 1, (index + 1) % agents, agents) for i in
+                 gameState.getLegalActions(index)])
+        else:
+            # If a ghost (at index), look for mini
+            return min(
+                [self.MiniMax(gameState.generateSuccessor(index, i), depth - 1, (index + 1) % agents, agents) for i in
+                 gameState.getLegalActions(index)])
 
 
-def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
-    """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    # util.raiseNotDefined()
-    '''
-    Q4
-    create a Priority Queue data structure, populate it with the start state at a value of 0
-    create a list of visited points
-    '''
-    a = util.PriorityQueue()
-    a.push((problem.getStartState(), [], 0), 0)
-    hasVisited = dict()
+class AlphaBetaAgent(MultiAgentSearchAgent):
+    """
+      Your minimax agent with alpha-beta pruning (question 3)
+    """
 
-    '''
-    Iterate over the the Priority Queue, ignoring previously visited points
-    push the successors and associated, point, cost, value, heurisitc value, and action into the queue as a new tuple
-        run the given heuristic on the state before pushing
-    return the point when the goal is reached
-    '''
-    while not a.isEmpty():
-        current, step, existed = a.pop()
-        if current in hasVisited and hasVisited[current] <= existed:
-            continue
-        if problem.isGoalState(current):
-            return step
+    def getAction(self, gameState):
+        """
+          Returns the minimax action using self.depth and self.evaluationFunction
+        """
+        agents = gameState.getNumAgents()
+        alpha = -float('inf')
+        beta = float('inf')
+        temp = -float('inf')
+        depth = agents * self.depth
+        for i in gameState.getLegalActions(0):
+            value = self.pruning(gameState.generateSuccessor(0, i), depth - 1, 1, agents, alpha, beta)
+            if value > temp:
+                action = i
+                temp = value
+            if value > beta:
+                return action
+            alpha = max(value, alpha)
+        return action
 
-        hasVisited[current] = existed
-        for state, action, cost in problem.getSuccessors(current):
-            a.push((state, step + [action], existed + cost), existed + cost + heuristic(state, problem))
-    return []
+    # Acts as the pruning function for alpha and beta
+    # The two will store their current values for pruning
+    def pruning(self, gameState, depth, index, agents, alpha, beta):
+        if depth == 0 or gameState.isLose() or gameState.isWin():
+            return self.evaluationFunction(gameState)
+        if not index:
+            value = -float('inf')
+            for legal in gameState.getLegalActions(index):
+                value = max(value,
+                        self.pruning(gameState.generateSuccessor(index, legal), depth - 1, (index + 1) % agents, agents,
+                                         alpha, beta))
+                # new value is smaller then old return new smaller value
+                if value > beta:
+                    return value
+                # new value is not smaller then old, check if it can be alpha
+                alpha = max(value, alpha)
+            return value
+        else:
+            # Prune the rest of nodes because value is smaller then alpha
+            value = float('inf')
+            for legal in gameState.getLegalActions(index):
+                value = min(value,
+                        self.pruning(gameState.generateSuccessor(index, legal), depth - 1, (index + 1) % agents, agents,
+                                         alpha, beta))
+                # new value is larger then old return new larger value
+
+                if value < alpha:
+                    return value
+                # new value is smaller then old, check if it can be beta
+                beta = min(value, beta)
+            return value
 
 
-# Abbreviations
-bfs = breadthFirstSearch
-dfs = depthFirstSearch
-astar = aStarSearch
-ucs = uniformCostSearch
+class ExpectimaxAgent(MultiAgentSearchAgent):
+    """
+      Your expectimax agent (question 4)
+    """
+
+    def getAction(self, gameState):
+        """
+          Returns the expectimax action using self.depth and self.evaluationFunction
+
+          All ghosts should be modeled as choosing uniformly at random from their
+          legal moves.
+        """
+        agents = gameState.getNumAgents()
+        depth = agents * self.depth
+        return \
+            max([(self.ExpectMiniMax(gameState.generateSuccessor(0, action), depth - 1, 1, agents), action) for action
+                 in
+                 gameState.getLegalActions(0)])[1]
+
+    # Works like minimax with probabilities added
+    def ExpectMiniMax(self, gameState, depth, index, agents):
+        if depth == 0 or gameState.isLose() or gameState.isWin():
+            return self.evaluationFunction(gameState)
+        newAgent = (index + 1) % agents
+        if not index:
+            return max([self.ExpectMiniMax(gameState.generateSuccessor(index, i), depth - 1, newAgent, agents) for i in
+                        gameState.getLegalActions(index)])
+        else:
+            # The difference between the two minimax functions  is that we will use as a mean for all solutions
+            beta = sum([self.ExpectMiniMax(gameState.generateSuccessor(index, i), depth - 1, newAgent, agents) for i in
+                        gameState.getLegalActions(index)])
+            return float(beta / len(gameState.getLegalActions(index)))
+
+
+def betterEvaluationFunction(currentGameState):
+    """
+      Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
+      evaluation function (question 5).
+
+      DESCRIPTION: We will take in account some factors:
+        -Distances to the food
+        -Is the ghost scared? How far is the ghost from Pacman?
+    """
+    updatedPos = currentGameState.getPacmanPosition()
+    newFood = currentGameState.getFood().asList()
+    ghostStates = currentGameState.getGhostStates()
+    scaredTimes = [ghostState.scaredTimer for ghostState in ghostStates]
+
+    # Food is where dots are
+    food = sum([manhattanDistance(food, updatedPos) for food in newFood])
+
+    # Checks posistion of ghost and their edibility for all ghost
+    ghostValue = 0
+    for ghost in range(len(ghostStates)):
+        dist = manhattanDistance(updatedPos, ghostStates[ghost].getPosition())
+        # If the ghost is scared Pacman tries to eat the ghost
+        if scaredTimes[0] > 0:
+            ghostValue += 10.0
+        # If the ghost is not scared Pacman runs aways
+        if scaredTimes[ghost] == 0 and dist < 1:
+            ghostValue -= 1. / (1 - dist)
+        # If we can get to it before the scared timer runs out, Pacman will tries to eat it
+        elif scaredTimes[ghost] < dist:
+            ghostValue += 1. / dist
+
+    return 1. / (1 + food * len(newFood)) + 10 * ghostValue + currentGameState.getScore()
+
+
+# Abbreviation
+better = betterEvaluationFunction
+
+
+class BoundedIntelligenceMaxAgent(MultiAgentSearchAgent):
+    def getAction(self, gameState):
+        """
+          Returns the expectimax action using self.depth and self.evaluationFunction
+
+          All ghosts should be modeled as choosing uniformly at random from their
+          legal moves.
+        """
+        agents = gameState.getNumAgents()
+        depth = agents * self.depth
+        return \
+            max([(
+                 self.boundedintelligencemaxagent(gameState.generateSuccessor(0, action), depth - 1, 1, agents), action)
+                 for action in gameState.getLegalActions(0)])[1]
+
+    def boundedintelligencemaxagent(self, gameState, depth, index, agents):
+        if depth == 0 or gameState.isLose() or gameState.isWin():
+            return self.evaluationFunction(gameState)
+        newAgent = (index + 1) % agents
+        if not index:
+            return max(
+                [self.boundedintelligencemaxagent(gameState.generateSuccessor(index, legal), depth - 1, newAgent, agents)
+                 for legal in gameState.getLegalActions(index)])
+        else:
+            # The difference between minimax and boundedintelligencemaxagent is used as the mean of possible outputs
+            legalLength = len(gameState.getLegalActions(index))
+            ghost = [
+                self.boundedintelligencemaxagent(gameState.generateSuccessor(index, legal), depth - 1, newAgent, agents) for
+                legal in gameState.getLegalActions(index)]
+            # finds min value
+            valueMin = min(ghost)
+            beta = 3 * valueMin
+            for legal in range(1, legalLength):
+                # if min is found do not add again
+                beta += ghost[legal] * (ghost[legal] != valueMin)
+            return float(beta / (legalLength + 2.))
