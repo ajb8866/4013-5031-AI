@@ -150,18 +150,14 @@ class MinimaxAgent(MultiAgentSearchAgent):
         return max([(self.minimax(gameState.generateSuccessor(0, action), depth - 1, 1, agents), action) for action in
                     gameState.getLegalActions(0)])[1]
 
-    # We create a method to calculate minimax in a recursive way
-    # It will receive current gamestate, the depth of the current graph, the current agent/index and the amount of agents
+
     def minimax(self, gameState, depth, index, agents):
-        # If we have gotten to the end or we have lost/won the game, we will evaluate current gameState
         if depth == 0 or gameState.isLose() or gameState.isWin():
             return self.evaluationFunction(gameState)
-        # Pacman agent is 0, so if the current agent is Pacman, we have to look for a max
         if not index:
             return max(
                 [self.minimax(gameState.generateSuccessor(index, i), depth - 1, (index + 1) % agents, agents) for i in
                  gameState.getLegalActions(index)])
-        # If its a ghost (index!=0), we will look for a minimum
         else:
             return min(
                 [self.minimax(gameState.generateSuccessor(index, i), depth - 1, (index + 1) % agents, agents) for i in
@@ -194,12 +190,9 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
     # alpha and beta will store their current values in order to prune our tree
     def minimaxPrun(self, gameState, depth, index, agents, alpha, beta):
-        # This function will work almost identical to minimax
         if depth == 0 or gameState.isLose() or gameState.isWin():
             return self.evaluationFunction(gameState)
         if not index:
-            # v will store our current maximum
-            # When we get to a value greater than our beta, we will prune the rest of nodes
             v = -float('inf')
             for i in gameState.getLegalActions(index):
                 v = max(v,
@@ -243,7 +236,6 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         max([(self.expectiminimax(gameState.generateSuccessor(0, action), depth - 1, 1, agents), action) for action in
              gameState.getLegalActions(0)])[1]
 
-    # As before, it will work very similarly to minimax algorithm
     def expectiminimax(self, gameState, depth, index, agents):
         if depth == 0 or gameState.isLose() or gameState.isWin():
             return self.evaluationFunction(gameState)
@@ -252,7 +244,6 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             return max([self.expectiminimax(gameState.generateSuccessor(index, i), depth - 1, newAgent, agents) for i in
                         gameState.getLegalActions(index)])
         else:
-            # The difference between minimax and expectiminimax is that we will use a mean of all possible outputs
             beta = sum([self.expectiminimax(gameState.generateSuccessor(index, i), depth - 1, newAgent, agents) for i in
                         gameState.getLegalActions(index)])
             return float(beta / len(gameState.getLegalActions(index)))
@@ -312,7 +303,6 @@ class BoundedIntelligenceMaxAgent(MultiAgentSearchAgent):
         max([(self.boundedintelligencemaxagent(gameState.generateSuccessor(0, action), depth - 1, 1, agents), action)
              for action in gameState.getLegalActions(0)])[1]
 
-    # As before, it will work very similarly to minimax algorithm
     def boundedintelligencemaxagent(self, gameState, depth, index, agents):
         if depth == 0 or gameState.isLose() or gameState.isWin():
             return self.evaluationFunction(gameState)
@@ -322,7 +312,6 @@ class BoundedIntelligenceMaxAgent(MultiAgentSearchAgent):
                 [self.boundedintelligencemaxagent(gameState.generateSuccessor(index, i), depth - 1, newAgent, agents)
                  for i in gameState.getLegalActions(index)])
         else:
-            # The difference between minimax and boundedintelligencemaxagent is that we will use a mean of all possible outputs
             l = len(gameState.getLegalActions(index))
             ghost = [
                 self.boundedintelligencemaxagent(gameState.generateSuccessor(index, i), depth - 1, newAgent, agents) for
@@ -331,6 +320,5 @@ class BoundedIntelligenceMaxAgent(MultiAgentSearchAgent):
             vm = min(ghost)
             beta = 3 * vm
             for i in range(1, l):
-                # We already have the minimal, so we don't want to add it again
                 beta += ghost[i] * (ghost[i] != vm)
             return float(beta / (l + 2.))
