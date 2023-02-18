@@ -7,25 +7,25 @@ The given implementation of Reflex Agent was to simply return pacman's current s
 The goal of Reflex Agent is to act quickly for the best immediate rewards with no plan for the future; 
 to do this, Reflex Agent need to avoid running into ghosts and move to the nearest food.
 Our new implementation returns -infinity if pacman moves into a position with a ghost and otherwise 
-returns a score inversly proportional to the manhattan distance to the nearest food.
+returns a score inversely proportional to the manhattan distance to the nearest food.
 
 Q1.2: 
 Our new implementation returns -infinity if pacman moves into a position with a ghost and otherwise 
-returns a score inversly proportional to the manhattan distance to the nearest food.
+returns a score inversely proportional to the manhattan distance to the nearest food.
 This rewards pacman for moving closer to the nearest food with the given distance algorithm and 
 greatly punishes him for colliding with ghosts while still being true to Reflex Agent's purpose of not planning ahead.
 
 Q2.1: 
 This is the minimax, which considers all moves that each of two players can make and assumes both are taking turns making optimal moves to either
-maximize or minimize the score, depending on the player. Minimax works recursivly to predict all possible future moves, ensuring the best guarenteed
-more for player 0, pacman. Minimax can work in the pacman game, since the evalution fuction of the game state, reflex agent, returns negative infintity 
+maximize or minimize the score, depending on the player. Minimax works recursively to predict all possible future moves, ensuring the best guaranteed
+more for player 0, pacman. Minimax can work in the pacman game, since the evaluation function of the game state, reflex agent, returns negative infinity
 if pacman dies and returns the highest score when no food remains.
 
 Q3.1: 
-Both Minimax and AlphaBeta use a tree of possible moves with different agents picking paths on the tree of possible moves for different final score. 
-In this way, both algorithms are actually the exact same, the different is the AlphaBeta removes nodes on the tree that are impossible to reach. 
-Even if a node gave a score of +infinity, it might never reached because the preciding agent would always pick the smaller option; so in AlphaBeta,
-unlike in Minimax, that node can simply be ignored and that possible never explored.
+Both Minimax and AlphaBeta use a tree of possible moves with different agents picking paths on the tree of possible moves for different final scores. 
+In this way, both algorithms are actually the exact same, the difference is the AlphaBeta removes nodes on the tree that are impossible to reach. 
+Even if a node gave a score of +infinity, it might never reached because the preceding agent would always pick the smaller option; so in AlphaBeta,
+unlike in Minimax, that node can simply be ignored and that possibility never explored.
 
 Q3.2:
 A tie is resolved by checking the node value against the beta value first; `if v > beta:` comes before `if v < alpha:`.
@@ -38,8 +38,8 @@ at a given node / time step. This is becuase "All ghosts should be modeled as ch
 
 Q5.1:
 Our new function rewards minimizing the manhatten distance to all foods and reducing the total number of food remaining by taking the inverse of the product
-of these two values. Such a strong relationship, unlike relfex agent, encourages being as close as possible to the most foods, but also prevent loitering 
-at a median point by rewarding reducing the number of foods. For ghosts, the fuction is heavily weighted towards avoiding ghosts with a 10x multiplier 
-to not lose at all costs. A scarded ghost becomes a target with a high rewards, if it can be caught; otherwise an inverly propotional score to the ghost's
+of these two values. Such a strong relationship, unlike reflex agent, encourages being as close as possible to the most foods, but also prevent loitering 
+at a median point by rewarding reducing the number of foods. For ghosts, the function is heavily weighted towards avoiding ghosts with a 10x multiplier 
+to not lose at all costs. A scared ghost becomes a target with a high rewards, if it can be caught; but otherwise an inversely proportional score to the ghost's
 distance is summed to food score. The game score is also added to the returned value.
 
