@@ -21,19 +21,16 @@ import random,util,math
 class QLearningAgent(ReinforcementAgent):
     """
       Q-Learning Agent
-
       Functions you should fill in:
         - computeValueFromQValues
         - computeActionFromQValues
         - getQValue
         - getAction
         - update
-
       Instance variables you have access to
         - self.epsilon (exploration prob)
         - self.alpha (learning rate)
         - self.discount (discount rate)
-
       Functions you should use
         - self.getLegalActions(state)
           which returns legal actions for a state
@@ -63,26 +60,27 @@ class QLearningAgent(ReinforcementAgent):
         "*** YOUR CODE HERE ***"
         legalActions = self.getLegalActions(state)
         if len(legalActions)==0:
-          return 0.0
+            return 0.0
         tmp = util.Counter()
         for action in legalActions:
-          tmp[action] = self.getQValue(state, action)
+            tmp[action] = self.getQValue(state, action)
         return tmp[tmp.argMax()]
     def computeActionFromQValues(self, state):
         """
           Compute the best action to take in a state.  Note that if there
           are no legal actions, which is the case at the terminal state,
           you should return None.
+          returns the action of the highest q value
         """
         "*** YOUR CODE HERE ***"
         actions = self.getLegalActions(state)
         best_action = None
         max_val = float('-inf')
         for action in actions:
-          q_value = self.q_values[(state, action)]
-          if max_val < q_value:
-            max_val = q_value
-            best_action = action
+            q_value = self.q_values[(state, action)]
+            if max_val < q_value:
+                max_val = q_value
+                best_action = action
         return best_action
 
     def getAction(self, state):
@@ -92,7 +90,6 @@ class QLearningAgent(ReinforcementAgent):
           take the best policy action otherwise.  Note that if there are
           no legal actions, which is the case at the terminal state, you
           should choose None as the action.
-
           HINT: You might want to use util.flipCoin(prob)
           HINT: To pick randomly from a list, use random.choice(list)
         """
@@ -110,7 +107,6 @@ class QLearningAgent(ReinforcementAgent):
           The parent class calls this to observe a
           state = action => nextState and reward transition.
           You should do your Q-Value update here
-
           NOTE: You should never call this function,
           it will be called on your behalf
         """
@@ -119,10 +115,10 @@ class QLearningAgent(ReinforcementAgent):
         old_part = (1 - self.alpha) * old_q_value
         reward_part = self.alpha * reward
         if not nextState:
-          self.q_values[(state, action)] = old_part + reward_part
+            self.q_values[(state, action)] = old_part + reward_part
         else:
-          nextState_part = self.alpha * self.discount * self.getValue(nextState)
-          self.q_values[(state, action)] = old_part + reward_part + nextState_part
+            nextState_part = self.alpha * self.discount * self.getValue(nextState)
+            self.q_values[(state, action)] = old_part + reward_part + nextState_part
 
     def getPolicy(self, state):
         return self.computeActionFromQValues(state)
@@ -139,7 +135,6 @@ class PacmanQAgent(QLearningAgent):
         These default parameters can be changed from the pacman.py command line.
         For example, to change the exploration rate, try:
             python pacman.py -p PacmanQLearningAgent -a epsilon=0.1
-
         alpha    - learning rate
         epsilon  - exploration rate
         gamma    - discount factor
@@ -166,7 +161,6 @@ class PacmanQAgent(QLearningAgent):
 class ApproximateQAgent(PacmanQAgent):
     """
        ApproximateQLearningAgent
-
        You should only have to overwrite getQValue
        and update.  All other QLearningAgent functions
        should work as is.
@@ -217,4 +211,4 @@ class ApproximateQAgent(PacmanQAgent):
             print ("Training episodes : {0}".format(self.numTraining))
             print ("=======Feature Weights=======")
             for i in features:
-              print( "{0} : {1}".format(i, self.weights[i]))
+                print( "{0} : {1}".format(i, self.weights[i]))

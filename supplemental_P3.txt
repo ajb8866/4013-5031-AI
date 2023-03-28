@@ -1,0 +1,16 @@
+Averi Bates and Daniel Schnabel
+
+Q1.1
+The function preforms the value iteration state update equation by getting all possible actions at a given state and evaluting the resulting Qvalue for every one of those possible actions. Then then max value of the policies resulting from the evalution is returned.
+Q1.2
+The function evalutes the bellman equation as a value iteration update, adding the current reward to the value of the next state times the discount factor, and summing the results of the indiviual q-value according to the probability, returing the total q-value of an action at a state.
+Q2.1
+a) a discount of .3 means the reward of 1 will be prefered to the reward of 10, which is discounted to .9, no noise risks a -10 move
+b) the assumption of noise prevents moves that risk -10, but a low discount factor (.2) means being far from -10 is still safe, and a negative livingReward encourages moving towards some reward
+c) a discount of .9 means the reward of 10, only discounted to 8.1, will be prefered to the reward of 1, no noise risks a -10 move
+d) no livingReward and a high discount factor (.9) does not penalize stay alive to find the 10 reward, and the assumption of noise prevents moves that risk -10, but this noise must be higher than in b) to avoid risking the dangerous path to the +10
+e) a very high livingReward encourages staying alive forever, and a similarly high discount factor avoid the low rewards on the exit nodes.
+Q3.1
+The QlearningAgent class works by updating the know q-values as more iterations are run. To do this, the update method sets the q-value for a given state and action to the learning factor alpha times the reward (e.g. living reward) plus 1-alpha times the old q-value, and if a new state is arrived in, plus the value of the new state times the discount and learning factors. QlearningAgent is able to determine the value of a node from it's q-values, by returning the highest q-value on that node from all the possible actions. QlearningAgent is also able to the best action to take at a node with it's q-values, by returning the action with the highest associated q-value at that state. 
+Q4.1
+With a high E, the agent tends to take more random movements, such that the true values of the negative and positive exits are discovered simulantiously. With a low E value, as soon as some positive reward path is discovered towards the +1 exit, it tends to make moves straight towards that and avoid the negative exit. This is as expected, since random movements are taken in the begining by both (when all Qvalues are 0), but a high E will continue to make random movements more often.
