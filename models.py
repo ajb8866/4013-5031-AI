@@ -17,26 +17,30 @@ class DigitClassificationModel(object):
     methods here. We recommend that you implement the RegressionModel before
     working on this part of the project.)
     """
+
     def __init__(self):
-        # Initialize your model parameters here
+        # Sets the batch size to 24
+        # Sets the hidden layer size to 350
+        # Set the number of labels to 10
+        # This numbers allow for the 97% requirement for the autograder
         "*** YOUR CODE HERE ***"
-        self.batch_size = 25             # 10
-        self.hidden_layer_size = 350     # 350
+        self.batch_size = 10
+        self.hidden_layer_size = 350
         self.num_labels = 10
 
-        # hidden layer 1
+        # Hidden Layer 1
         self.w_1 = nn.Parameter(784, self.hidden_layer_size)
         self.b_1 = nn.Parameter(1, self.hidden_layer_size)
 
-        # hidden layer 2
+        # Hidden Layer 2
         self.w_2 = nn.Parameter(self.hidden_layer_size, self.hidden_layer_size)
         self.b_2 = nn.Parameter(1, self.hidden_layer_size)
 
-        # hidden layer 3
+        # Hidden Layer 3
         self.w_3 = nn.Parameter(self.hidden_layer_size, self.hidden_layer_size)
         self.b_3 = nn.Parameter(1, self.hidden_layer_size)
 
-        # output vector
+        # Output of hidden layers
         self.output_wt = nn.Parameter(self.hidden_layer_size, self.num_labels)
         self.output_bias = nn.Parameter(1, self.num_labels)
 
@@ -55,24 +59,24 @@ class DigitClassificationModel(object):
                 (also called logits)
         """
         "*** YOUR CODE HERE ***"
-         # hidden layer 1
-        trans_1 = nn.Linear(x, self.w_1)
-        trans_bias_1 = nn.AddBias(trans_1, self.b_1)
-        layer_1 = nn.ReLU(trans_bias_1)
+        # Hidden Layer 1
+        t_1 = nn.Linear(x, self.w_1)
+        t_b_1 = nn.AddBias(t_1, self.b_1)
+        hidden_layer_1 = nn.ReLU(t_b_1)
 
-        # hidden layer 2
-        trans_2 = nn.Linear(layer_1, self.w_2)
-        trans_bias_2 = nn.AddBias(trans_2, self.b_2)
-        layer_2 = nn.ReLU(trans_bias_2)
+        # Hidden Layer 2
+        t_2 = nn.Linear(hidden_layer_1, self.w_2)
+        t_b_2 = nn.AddBias(t_2, self.b_2)
+        hidden_layer_2 = nn.ReLU(t_b_2)
 
-        # hidden layer 3
-        trans_3 = nn.Linear(layer_2, self.w_3)
-        trans_bias_3 = nn.AddBias(trans_3, self.b_3)
-        layer_3 = nn.ReLU(trans_bias_3)
+        # Hidden Layer 3
+        t_3 = nn.Linear(hidden_layer_2, self.w_3)
+        t_b_3 = nn.AddBias(t_3, self.b_3)
+        hidden_layer_3 = nn.ReLU(t_b_3)
 
-        # output vector (no relu)
-        last_trans = nn.Linear(layer_3, self.output_wt)
-        return nn.AddBias(last_trans, self.output_bias)
+        # Output Vector
+        t_out = nn.Linear(hidden_layer_3, self.output_wt)
+        return nn.AddBias(t_out, self.output_bias)
 
     def get_loss(self, x, y):
         """
@@ -88,6 +92,7 @@ class DigitClassificationModel(object):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
+        # the estimated value of a response variable in a linear regression model
         y_hats = self.run(x)
         return nn.SoftmaxLoss(y_hats, y)
 
@@ -96,17 +101,21 @@ class DigitClassificationModel(object):
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+        # a rate statistically adjusted to remove the effect of a variable in this cas to help
+        # balance out the learning rate
         adjusted_rate = -0.12
         while True:
 
-            for row_vect, y in dataset.iterate_once(self.batch_size):
-                loss = self.get_loss(row_vect, y)
-                params = ([self.w_1, self.w_2, self.w_3, self.output_wt,
-                           self.b_1, self.b_2, self.b_3, self.output_bias])
-                gradients = nn.gradients(loss, params)
+            # sets up the gradient based on the given inputs when creating a DigiClass object
+            # then changes the learning rate accordingly
+            for row, y in dataset.iterate_once(self.batch_size):
+                loss = self.get_loss(row, y)
+                gradients_parameters = ([self.w_1, self.w_2, self.w_3, self.output_wt,
+                                         self.b_1, self.b_2, self.b_3, self.output_bias])
+                gradients = nn.gradients(loss, gradients_parameters)
                 learning_rate = min(-0.005, adjusted_rate)
 
-                # updates
+                # updates the gradients with the learning rates
                 self.w_1.update(gradients[0], learning_rate)
                 self.w_2.update(gradients[1], learning_rate)
                 self.w_3.update(gradients[2], learning_rate)
@@ -120,4 +129,3 @@ class DigitClassificationModel(object):
             # check for 97.5 % accuracy after each epoch, not after each batch
             if dataset.get_validation_accuracy() >= 0.975:
                 return
-
