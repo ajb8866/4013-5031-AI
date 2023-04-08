@@ -117,4 +117,8 @@ class DigitClassificationModel(object):
                 self.output_bias.update(gradients[7], learning_rate)
 
             adjusted_rate += 0.05
+            # check for 97.5 % accuracy after each epoch, not after each batch
+            if dataset.get_validation_accuracy() >= 0.975:
+                return
+
 
