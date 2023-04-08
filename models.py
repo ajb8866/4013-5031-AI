@@ -121,4 +121,3 @@ class DigitClassificationModel(object):
             if dataset.get_validation_accuracy() >= 0.975:
                 return
 
-
