@@ -19,12 +19,12 @@ class DigitClassificationModel(object):
     """
 
     def __init__(self):
-        # Sets the batch size to 24
+        # Sets the batch size to 15
         # Sets the hidden layer size to 350
         # Set the number of labels to 10
         # This numbers allow for the 97% requirement for the autograder
         "*** YOUR CODE HERE ***"
-        self.batch_size = 10
+        self.batch_size = 15
         self.hidden_layer_size = 350
         self.num_labels = 10
 
