@@ -1,14 +1,13 @@
 Answer Questions mentioned in the rubric in this file!
-Averi Bates and Daniel Schnabel
-
 Q1
 
+1) Please describe in 2-3 sentences your methodology for choosing the number of hidden layers, batch size, learning rates, and number of nodes. Please mention any reduction schemas utilized or any noteworthy trial and error experiments.
 
-Q2.1
+The methodolgy for choosing hidden layers, batch size, learning rates, and number of nodes was simple as it revolved around experimentation various inputs were put in unitl a number meeting the required 97% accuracy was met. From once an number was chosen then increasing smaller ranges were chosen around those numbers until an optimal point were picked. 
+Q2)
 
+a) In 2-3 sentences please explain the purpose of Intersection over union operation.
+Intersection over union (IoU) is a number that quantifies the degree of overlap between two bounding boxes. It is a metric for measuring the accuracy of an object detection model, which is a computer vision task that involves localization and classification of objects in an image; in the case of car_yolo it gives the accuracy of the dectection of car objects
 
-Q2.2
-
-
-Q2 prediction[see attached image]
-
+b) In 2-3 sentences please explain the purpose of non-max suppression.
+Non-maximum Suppression (NMS) A technique to filter the predictions of object detectors. Typical object detection pipelines haveone component for generating proposals for classification. Proposals are nothing but the candidate regions for the object of interest; in the case of the car_yolo it is used in the proposals for cars classifications. 
