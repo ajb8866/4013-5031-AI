@@ -50,18 +50,18 @@ def yolo_filter_boxes(boxes, box_confidence, box_class_probs, threshold = .6):
     # Step 2: Find the box_classes using the max box_scores, keep track of the corresponding score
     ##(≈ 2 lines)
     # IMPORTANT: set axis to -1
-    box_classes = K.argmax(box_scores, axis=-1)
-    box_class_scores = K.max(box_scores, axis=-1)
+    box_classes = K.argmax(box_scores, axis = -1)
+    box_class_scores = K.max(box_scores, axis = -1)
     
     # Step 3: Create a filtering mask based on "box_class_scores" by using "threshold". The mask should have the
     # same dimension as box_class_scores, and be True for the boxes you want to keep (with probability >= threshold)
     ## (≈ 1 line)
-    filtering_mask = box_class_scores > threshold
+    filtering_mask = box_class_scores >= threshold
     
     # Step 4: Apply the mask to box_class_scores, boxes and box_classes
     ## (≈ 3 lines)
     scores = tf.boolean_mask(box_class_scores, filtering_mask)
-    boxes = tf.boolean_mask(box_scores, filtering_mask)
+    boxes = tf.boolean_mask(boxes, filtering_mask)
     classes = tf.boolean_mask(box_classes, filtering_mask)
     ### END CODE HERE
     
@@ -87,8 +87,8 @@ def iou(box1, box2):
     ##(≈ 7 lines)
     xi1 = np.maximum(box1[0], box2[0])
     yi1 = np.maximum(box1[1], box2[1])
-    xi2 = np.maximum(box1[2], box2[2])
-    yi2 = np.maximum(box1[3], box2[3])
+    xi2 = np.minimum(box1[2], box2[2])
+    yi2 = np.minimum(box1[3], box2[3])
     inter_width = max(xi2-xi1, 0)
     inter_height =  max(yi2-yi1, 0)
     inter_area = inter_width * inter_height
@@ -100,7 +100,7 @@ def iou(box1, box2):
     union_area = box1_area + box2_area - inter_area
     
     # compute the IoU
-    iou = float(inter_area)/float(union_area)
+    iou = inter_area/union_area
     ### END CODE HERE
     
     return iou
@@ -129,7 +129,7 @@ def yolo_non_max_suppression(scores, boxes, classes, max_boxes = 10, iou_thresho
     """
     
     max_boxes_tensor = tf.Variable(max_boxes, dtype='int32')     # tensor to be used in tf.image.non_max_suppression()
-
+    
     ### START CODE HERE
     # Use tf.image.non_max_suppression() to get the list of indices corresponding to boxes you keep
     ##(≈ 1 line)
@@ -183,20 +183,20 @@ def yolo_eval(yolo_outputs, image_shape = (720.0, 1280.0), max_boxes=10, score_t
     
     ### START CODE HERE
     # Retrieve outputs of the YOLO model (≈1 line)
-    box_xy, box_wh, box_confidence, box_class_probs = None
+    box_xy, box_wh, box_confidence, box_class_probs = yolo_outputs
     
     # Convert boxes to be ready for filtering functions (convert boxes box_xy and box_wh to corner coordinates)
     boxes = yolo_boxes_to_corners(box_xy, box_wh)
     
     # Use one of the functions you've implemented to perform Score-filtering with a threshold of score_threshold (≈1 line)
-    scores, boxes, classes = yolo_filter_boxes(box_confidence, boxes, box_class_probs, score_threshold)
+    scores, boxes, classes = yolo_filter_boxes(box_confidence, boxes, box_class_probs, threshold = score_threshold)
     
     # Scale boxes back to original image shape.
     boxes = scale_boxes(boxes, image_shape)
     
     # Use one of the functions you've implemented to perform Non-max suppression with 
     # maximum number of boxes set to max_boxes and a threshold of iou_threshold (≈1 line)
-    scores, boxes, classes = yolo_non_max_suppression(scores, boxes, classes, max_boxes, iou_threshold)
+    scores, boxes, classes = yolo_non_max_suppression(scores, boxes, classes, max_boxes = max_boxes, iou_threshold = iou_threshold)
     ### END CODE HERE
     
     return scores, boxes, classes
@@ -224,7 +224,7 @@ def predict(image_file):
     yolo_model_outputs = yolo_model(image_data)
     yolo_outputs = yolo_head(yolo_model_outputs, anchors, len(class_names))
     
-   # out_scores, out_boxes, out_classes = yolo_eval(yolo_outputs, [image.size[1],  image.size[0]], 10, 0.3, 0.5)
+    # out_scores, out_boxes, out_classes = yolo_eval(yolo_outputs, [image.size[1],  image.size[0]], 10, 0.3, 0.5)
     out_scores, out_boxes, out_classes = yolo_eval(yolo_outputs, [float(image.size[1]), float(image.size[0])], 10, 0.3, 0.5)
 
     # Print predictions info
