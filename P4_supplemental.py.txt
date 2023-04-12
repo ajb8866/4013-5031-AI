@@ -11,3 +11,6 @@ Intersection over union (IoU) is a number that quantifies the degree of overlap 
 
 b) In 2-3 sentences please explain the purpose of non-max suppression.
 Non-maximum Suppression (NMS) A technique to filter the predictions of object detectors. Typical object detection pipelines haveone component for generating proposals for classification. Proposals are nothing but the candidate regions for the object of interest; in the case of the car_yolo it is used in the proposals for cars classifications. 
+
+2.5 Unit Test)
+While our code did not run and output an image-based, the Yolo program can be explained briefly based on the expected results, scores, and boxes. First, as the object is predicted, then by the prediction's confidence, next the object's location on the screen (as a coordinate), and finally, the object's size is made as a currency pair. 
