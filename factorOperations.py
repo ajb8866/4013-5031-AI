@@ -102,29 +102,29 @@ def joinFactors(factors: List[Factor]):
 
 
     "*** YOUR CODE HERE ***"
-    factorList=[factor for i in factors]
-    conditionals =set([])
-    unconditionals =set([])
-    
-    for i in factorList:
-        for o in factor.conditionedVariables():
-            conditionals.add(o)
-        for p in factor.unconditionedVariables():
-            unconditionals.add(p)
-            
-            
-    conditionals=list(filter(lambda x: x not in unconditional, conditional))
-    
-    varDDict = allFactors[0].variableDomainsDict()
-    CPT = Factor(unconditionals, conditionals, varDDict)
-    
-    
-    for i in CPT.getAllPossibleAssignmentDicts():
-        prob = 1
-        for o in factorList:
-            prob = prob * factor.getProbability(i)
-        CPT.setProbability(i, prob)
-    return CPT
+    unconditioned = set()
+    conditioned = set()
+
+    for factor in factors:
+        for conditionJoin in factor.conditionedVariables():
+            conditioned.add(conditionJoin)
+        for unconditionedJoin in factor.unconditionedVariables():
+            unconditioned.add(unconditionedJoin)
+
+    for removeUnconditionedJoin in unconditioned:
+        if removeUnconditionedJoin in conditioned:
+            conditioned.remove(removeUnconditionedJoin)
+
+    joined = Factor(unconditioned, conditioned, factors[0].variableDomainsDict())
+
+    for joinedAssign in joined.getAllPossibleAssignmentDicts():
+        joinedProduct = 1
+        for factor in factors:
+            joinedProduct *= factor.getProbability(joinedAssign)
+        joined.setProbability(joinedAssign, joinedProduct)
+    return joined
+
+
     "*** END YOUR CODE HERE ***"
 
 ########### ########### ###########
@@ -175,10 +175,21 @@ def eliminateWithCallTracking(callTrackingList=None):
                     "unconditionedVariables: " + str(factor.unconditionedVariables()))
 
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
-        "*** END YOUR CODE HERE ***"
+        unconditioned_eliminate = factor.unconditionedVariables()
+        unconditioned_eliminate.remove(eliminationVariable)
+        reduced_unconditioned = Factor(unconditioned_eliminate, factor.conditionedVariables(), factor.variableDomainsDict())
 
+        for reducedAssign in reduced_unconditioned.getAllPossibleAssignmentDicts():
+            total = 0
+            for eliminationVar in factor.variableDomainsDict()[eliminationVariable]:
+                full = reducedAssign
+                full[eliminationVariable] = eliminationVar
+                total += factor.getProbability(full)
+            reduced_unconditioned.setProbability(reducedAssign, total)
+        return reduced_unconditioned
+    "*** END YOUR CODE HERE ***"
     return eliminate
+
 
 eliminate = eliminateWithCallTracking()
 
