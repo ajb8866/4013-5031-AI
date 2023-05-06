@@ -24,6 +24,7 @@ from util import manhattanDistance, raiseNotDefined
 from factorOperations import joinFactorsByVariableWithCallTracking, joinFactors
 from factorOperations import eliminateWithCallTracking
 
+
 ########### ########### ###########
 ########### QUESTION 1  ###########
 ########### ########### ###########
@@ -125,13 +126,14 @@ def inferenceByEnumeration(bayesNet: bn, queryVariables: List[str], evidenceDict
     # the order is join on all variables, then eliminate on all elimination variables
     return queryConditionedOnEvidence
 
+
 ########### ########### ###########
 ########### QUESTION 4  ###########
 ########### ########### ###########
 
 def inferenceByVariableEliminationWithCallTracking(callTrackingList=None):
-
-    def inferenceByVariableElimination(bayesNet: bn, queryVariables: List[str], evidenceDict: Dict, eliminationOrder: List[str]):
+    def inferenceByVariableElimination(bayesNet: bn, queryVariables: List[str], evidenceDict: Dict,
+                                       eliminationOrder: List[str]):
         """
         This function should perform a probabilistic inference query that
         returns the factor:
@@ -181,9 +183,9 @@ def inferenceByVariableEliminationWithCallTracking(callTrackingList=None):
 
         # this is for autograding -- don't modify
         joinFactorsByVariable = joinFactorsByVariableWithCallTracking(callTrackingList)
-        eliminate             = eliminateWithCallTracking(callTrackingList)
-        if eliminationOrder is None: # set an arbitrary elimination order if None given
-            eliminationVariables = bayesNet.variablesSet() - set(queryVariables) -\
+        eliminate = eliminateWithCallTracking(callTrackingList)
+        if eliminationOrder is None:  # set an arbitrary elimination order if None given
+            eliminationVariables = bayesNet.variablesSet() - set(queryVariables) - \
                                    set(evidenceDict.keys())
             eliminationOrder = sorted(list(eliminationVariables))
 
@@ -202,10 +204,11 @@ def inferenceByVariableEliminationWithCallTracking(callTrackingList=None):
 
         "*** END YOUR CODE HERE ***"
 
-
     return inferenceByVariableElimination
 
+
 inferenceByVariableElimination = inferenceByVariableEliminationWithCallTracking()
+
 
 def sampleFromFactorRandomSource(randomSource=None):
     if randomSource is None:
@@ -231,17 +234,17 @@ def sampleFromFactorRandomSource(randomSource=None):
         """
         if conditionedAssignments is None and len(factor.conditionedVariables()) > 0:
             raise ValueError("Conditioned assignments must be provided since \n" +
-                            "this factor has conditionedVariables: " + "\n" +
-                            str(factor.conditionedVariables()))
+                             "this factor has conditionedVariables: " + "\n" +
+                             str(factor.conditionedVariables()))
 
         elif conditionedAssignments is not None:
             conditionedVariables = set([var for var in conditionedAssignments.keys()])
 
             if not conditionedVariables.issuperset(set(factor.conditionedVariables())):
                 raise ValueError("Factor's conditioned variables need to be a subset of the \n"
-                                    + "conditioned assignments passed in. \n" + \
-                                "conditionedVariables: " + str(conditionedVariables) + "\n" +
-                                "factor.conditionedVariables: " + str(set(factor.conditionedVariables())))
+                                 + "conditioned assignments passed in. \n" + \
+                                 "conditionedVariables: " + str(conditionedVariables) + "\n" +
+                                 "factor.conditionedVariables: " + str(set(factor.conditionedVariables())))
 
             # Reduce the domains of the variables that have been
             # conditioned upon for this factor
@@ -279,13 +282,16 @@ def sampleFromFactorRandomSource(randomSource=None):
 
     return sampleFromFactor
 
+
 sampleFromFactor = sampleFromFactorRandomSource()
+
 
 class DiscreteDistribution(dict):
     """
     A DiscreteDistribution models belief distributions and weight distributions
     over a finite set of discrete keys.
     """
+
     def __getitem__(self, key):
         self.setdefault(key, 0)
         return dict.__getitem__(self, key)
@@ -340,9 +346,11 @@ class DiscreteDistribution(dict):
         {}
         """
         "*** YOUR CODE HERE ***"
-        if self.total() != 0:
-            for k, v in self.items():
-                self[k] = v / self.total()
+        total = float(self.total())
+        if total == 0.0:
+            return
+        for k in self.keys():
+            self[k] = float(self[k]) / total
         "*** END YOUR CODE HERE ***"
 
     def sample(self):
@@ -367,20 +375,24 @@ class DiscreteDistribution(dict):
         0.0
         """
         "*** YOUR CODE HERE ***"
-        rand = random.random()
-        sum = 0
+        if self.total() != 1:
+            self.normalize()
 
-        for k, v in self.items():
-            sum += v / float(self.total())
-            if rand < sum:
+        rand = random.random() * self.total()
+        total = 0
+
+        for k in self.keys():
+            total = total + self[k]
+            if rand <= total:
                 return k
-            "*** END YOUR CODE HERE ***"
+        "*** END YOUR CODE HERE ***"
 
 
 class InferenceModule:
     """
     An inference module tracks a belief distribution over a ghost's location.
     """
+
     ############################################
     # Useful methods for all inference modules #
     ############################################
@@ -410,7 +422,7 @@ class InferenceModule:
             dist[jail] = 1.0
             return dist
         pacmanSuccessorStates = game.Actions.getLegalNeighbors(pacmanPosition, \
-                gameState.getWalls())  # Positions Pacman can move to
+                                                               gameState.getWalls())  # Positions Pacman can move to
         if ghostPosition in pacmanSuccessorStates:  # Ghost could get caught
             mult = 1.0 / float(len(pacmanSuccessorStates))
             dist[jail] = mult
@@ -538,6 +550,7 @@ class ExactInference(InferenceModule):
     The exact dynamic inference module should use forward algorithm updates to
     compute the exact belief function at each time step.
     """
+
     def initializeUniformly(self, gameState):
         """
         Begin with a uniform distribution over legal ghost positions (i.e., not
@@ -568,8 +581,11 @@ class ExactInference(InferenceModule):
         position is known.
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
-        "*** END YOUR CODE HERE ***"
+        jailPos = self.getJailPosition()
+        pacPos = gameState.getPacmanPosition()
+        for pos in self.allPositions:
+            prob = self.getObservationProb(observation, pacPos, pos, jailPos)
+            self.beliefs[pos] = self.beliefs[pos] * prob
         self.beliefs.normalize()
 
     ########### ########### ###########
@@ -586,7 +602,12 @@ class ExactInference(InferenceModule):
         current position is known.
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        DDist = DiscreteDistribution()
+        for old in self.allPositions:
+            pos = self.getPositionDistribution(gameState, old)
+            for new in self.allPositions:
+                DDist[new] += pos[new] * self.beliefs[old]
+        self.beliefs = DDist
         "*** END YOUR CODE HERE ***"
 
     def getBeliefDistribution(self):
@@ -597,6 +618,7 @@ class ParticleFilter(InferenceModule):
     """
     A particle filter for approximately tracking a single ghost.
     """
+
     def __init__(self, ghostAgent, numParticles=300):
         InferenceModule.__init__(self, ghostAgent)
         self.setNumParticles(numParticles)
@@ -618,7 +640,17 @@ class ParticleFilter(InferenceModule):
         """
         self.particles = []
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        particles = []
+        n = self.numParticles
+        size = len(self.legalPositions)
+        while self.numParticles > 0:
+            if self.numParticles > size:
+                self.particles += self.legalPositions
+                self.numParticles -= size
+            else:
+                particles += self.legalPositions[0:self.numParticles]
+                self.numParticles = 0
+        self.particles = particles
         "*** END YOUR CODE HERE ***"
 
     def getBeliefDistribution(self):
@@ -630,7 +662,11 @@ class ParticleFilter(InferenceModule):
         This function should return a normalized distribution.
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        DDist = DiscreteDistribution()
+        for old in self.particles:
+            DDist[old] += 1
+        DDist.normalize()
+        return DDist
         "*** END YOUR CODE HERE ***"
 
     ########### ########### ###########
@@ -667,12 +703,12 @@ class ParticleFilter(InferenceModule):
         "*** END YOUR CODE HERE ***"
 
 
-
 class JointParticleFilter(ParticleFilter):
     """
     JointParticleFilter tracks a joint distribution over tuples of all ghost
     positions.
     """
+
     def __init__(self, numParticles=600):
         self.setNumParticles(numParticles)
 
@@ -766,6 +802,7 @@ class MarginalInference(InferenceModule):
     A wrapper around the JointInference module that returns marginal beliefs
     about ghosts.
     """
+
     def initializeUniformly(self, gameState):
         """
         Set the belief state to an initial, prior value.
