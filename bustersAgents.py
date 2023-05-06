@@ -20,34 +20,25 @@ from keyboardAgents import KeyboardAgent
 import inference
 import busters
 
-
 class NullGraphics:
     "Placeholder for graphics"
-
-    def initialize(self, state, isBlue=False):
+    def initialize(self, state, isBlue = False):
         pass
-
     def update(self, state):
         pass
-
     def pause(self):
         pass
-
     def draw(self, state):
         pass
-
     def updateDistributions(self, dist):
         pass
-
     def finish(self):
         pass
-
 
 class KeyboardInference(inference.InferenceModule):
     """
     Basic inference module for use with the keyboard.
     """
-
     def initializeUniformly(self, gameState):
         "Begin with a uniform distribution over ghost positions."
         self.beliefs = util.Counter()
@@ -76,8 +67,7 @@ class KeyboardInference(inference.InferenceModule):
 class BustersAgent:
     "An agent that tracks and displays its beliefs about ghost positions."
 
-    def __init__(self, index=0, inference="ExactInference", ghostAgents=None, observeEnable=True,
-                 elapseTimeEnable=True):
+    def __init__( self, index = 0, inference = "ExactInference", ghostAgents = None, observeEnable = True, elapseTimeEnable = True):
         try:
             inferenceType = util.lookup(inference, globals())
         except Exception:
@@ -102,7 +92,7 @@ class BustersAgent:
         return gameState
 
     def getAction(self, gameState):
-        "Updates beliefs, then chooses an action based on updated beliefs."
+        "Updates beliefs, then chooses an legalAction based on updated beliefs."
         for index, inf in enumerate(self.inferenceModules):
             if not self.firstMove and self.elapseTimeEnable:
                 inf.elapseTime(gameState)
@@ -117,11 +107,10 @@ class BustersAgent:
         "By default, a BustersAgent just stops.  This should be overridden."
         return Directions.STOP
 
-
 class BustersKeyboardAgent(BustersAgent, KeyboardAgent):
     "An agent controlled by the keyboard that displays beliefs about ghost positions."
 
-    def __init__(self, index=0, inference="KeyboardInference", ghostAgents=None):
+    def __init__(self, index = 0, inference = "KeyboardInference", ghostAgents = None):
         KeyboardAgent.__init__(self, index)
         BustersAgent.__init__(self, index, inference, ghostAgents)
 
@@ -131,11 +120,9 @@ class BustersKeyboardAgent(BustersAgent, KeyboardAgent):
     def chooseAction(self, gameState):
         return KeyboardAgent.getAction(self, gameState)
 
-
 from distanceCalculator import Distancer
 from game import Actions
 from game import Directions
-
 
 class GreedyBustersAgent(BustersAgent):
     "An agent that charges the closest ghost."
@@ -152,7 +139,7 @@ class GreedyBustersAgent(BustersAgent):
     def chooseAction(self, gameState: busters.GameState):
         """
         First computes the most likely position of each ghost that has
-        not yet been captured, then chooses an action that brings
+        not yet been captured, then chooses an legalAction that brings
         Pacman closest to the closest ghost (according to mazeDistance!).
         """
         pacmanPosition = gameState.getPacmanPosition()
@@ -160,39 +147,35 @@ class GreedyBustersAgent(BustersAgent):
         livingGhosts = gameState.getLivingGhosts()
         livingGhostPositionDistributions = \
             [beliefs for i, beliefs in enumerate(self.ghostBeliefs)
-             if livingGhosts[i + 1]]
+             if livingGhosts[i+1]]
         "*** YOUR CODE HERE ***"
-        bestGhostPos = []
-        for ghostIdx in range(len(livingGhostPositionDistributions)):
-            mostlikelyProb = 0
-            mostlikelyPos = None
-            for ghostPos, ghostProb \
-                    in livingGhostPositionDistributions[ghostIdx].items():
-                if ghostProb > mostlikelyProb:
-                    mostlikelyProb = ghostProb
-                    mostlikelyPos = ghostPos
-            bestGhostPos.append((mostlikelyPos,
-                                 self.distancer.getDistance(mostlikelyPos, pacmanPosition)))
+        
+        maxDist = []
+        for i in livingGhostPositionDistributions:
+            maxDist.append(i.argMax())
 
-        closestPos = None
-        closestDist = math.inf
+        if not maxDist:
+            return None
 
-        for ghostPos, ghostDist in bestGhostPos:
-            if ghostDist < closestDist:
-                closestDist = ghostDist
-                closestPos = ghostPos
+        closest = maxDist[0]
+        
+        shortDist = self.distancer.getDistance(closest, pacmanPosition)
+        
+        for currntPos in maxDist:
+            if self.distancer.getDistance(currntPos, pacmanPosition) < shortDist:
+                closest = currntPos
+                shortDist = self.distancer.getDistance(currntPos, pacmanPosition)
 
-        bestLegalAction = []
-        newClosestDist = math.inf
+        legalResultAction = legal[0]
+        
+        shortDist = self.distancer.getDistance(closest, Actions.getSuccessor(pacmanPosition, legalResultAction))
+        for legalAction in legal:
+            successorPosition = Actions.getSuccessor(pacmanPosition, legalAction)
+            if not successorPosition:
+                continue
+            if self.distancer.getDistance(closest, successorPosition) < shortDist:
+                legalResultAction = legalAction
+                shortDist = self.distancer.getDistance(closest, successorPosition)
 
-        for ghostAction in legal:
-            otherAction = Actions.getSuccessor(pacmanPosition, ghostAction)
-            updatedDist = self.distancer.getDistance(closestPos, otherAction)
-            if updatedDist < newClosestDist:
-                newClosestDist = updatedDist
-                bestLegalAction = [ghostAction]
-            elif updatedDist == newClosestDist:
-                bestLegalAction.append(ghostAction)
-        mostFreqBest = max(set(bestLegalAction), key=bestLegalAction.count)
-        return mostFreqBest
+        return legalResultAction
         "*** END YOUR CODE HERE ***"
