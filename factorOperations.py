@@ -44,10 +44,10 @@ def joinFactorsByVariableWithCallTracking(callTrackingList=None):
         numVariableOnLeft = len([factor for factor in currentFactorsToJoin if joinVariable in factor.unconditionedVariables()])
         if numVariableOnLeft > 1:
             print("Factor failed joinFactorsByVariable typecheck: ", factor)
-            raise ValueError("The joinBy variable can only appear in one factor as an \nunconditioned variable. \n" +  
+            raise ValueError("The joinBy variable can only appear in one factor as an \nunconditioned variable. \n" +
                                "joinVariable: " + str(joinVariable) + "\n" +
                                ", ".join(map(str, [factor.unconditionedVariables() for factor in currentFactorsToJoin])))
-        
+
         joinedFactor = joinFactors(currentFactorsToJoin)
         return currentFactorsNotToJoin, joinedFactor
 
@@ -61,22 +61,22 @@ joinFactorsByVariable = joinFactorsByVariableWithCallTracking()
 
 def joinFactors(factors: List[Factor]):
     """
-    Input factors is a list of factors.  
-    
-    You should calculate the set of unconditioned variables and conditioned 
+    Input factors is a list of factors.
+
+    You should calculate the set of unconditioned variables and conditioned
     variables for the join of those factors.
 
-    Return a new factor that has those variables and whose probability entries 
+    Return a new factor that has those variables and whose productProb entries
     are product of the corresponding rows of the input factors.
 
-    You may assume that the variableDomainsDict for all the input 
+    You may assume that the variableDomainsDict for all the input
     factors are the same, since they come from the same BayesNet.
 
-    joinFactors will only allow unconditionedVariables to appear in 
+    joinFactors will only allow unconditionedVariables to appear in
     one input factor (so their join is well defined).
 
-    Hint: Factor methods that take an assignmentDict as input 
-    (such as getProbability and setProbability) can handle 
+    Hint: Factor methods that take an assignmentDict as input
+    (such as getProbability and setProbability) can handle
     assignmentDicts that assign more variables than are in that factor.
 
     Useful functions:
@@ -95,37 +95,42 @@ def joinFactors(factors: List[Factor]):
         if len(intersect) > 0:
             print("Factor failed joinFactors typecheck: ", factor)
             raise ValueError("unconditionedVariables can only appear in one factor. \n"
-                    + "unconditionedVariables: " + str(intersect) + 
-                    "\nappear in more than one input factor.\n" + 
+                    + "unconditionedVariables: " + str(intersect) +
+                    "\nappear in more than one input factor.\n" +
                     "Input factors: \n" +
                     "\n".join(map(str, factors)))
 
 
     "*** YOUR CODE HERE ***"
+    "*** YOUR CODE HERE ***"
     unconditioned = set()
     conditioned = set()
+    domain = None
+    for f in factors:
+        
+        for i in f.unconditionedVariables():
+            conditioned.discard(i)
+            unconditioned.add(i)
+            
+        for i in f.conditionedVariables():
+            if i not in unconditioned:
+                conditioned.add(i)
+                
+        domain = f.variableDomainsDict()
+        
+    joinedFactor = Factor(list(unconditioned), list(conditioned), domain)
+    
+    for possibleAssignment in joinedFactor.getAllPossibleAssignmentDicts():
+        productProb = 1
 
-    for factor in factors:
-        for conditionJoin in factor.conditionedVariables():
-            conditioned.add(conditionJoin)
-        for unconditionedJoin in factor.unconditionedVariables():
-            unconditioned.add(unconditionedJoin)
+        for f in factors:
+            productProb *= f.getProbability(possibleAssignment)
 
-    for removeUnconditionedJoin in unconditioned:
-        if removeUnconditionedJoin in conditioned:
-            conditioned.remove(removeUnconditionedJoin)
+        joinedFactor.setProbability(possibleAssignment, productProb)
 
-    joined = Factor(unconditioned, conditioned, factors[0].variableDomainsDict())
-
-    for joinedAssign in joined.getAllPossibleAssignmentDicts():
-        joinedProduct = 1
-        for factor in factors:
-            joinedProduct *= factor.getProbability(joinedAssign)
-        joined.setProbability(joinedAssign, joinedProduct)
-    return joined
-
-
-    "*** END YOUR CODE HERE ***"
+    return joinedFactor
+    # multiply those not in conditioned
+"*** END YOUR CODE HERE ***"
 
 ########### ########### ###########
 ########### QUESTION 3  ###########
@@ -138,8 +143,8 @@ def eliminateWithCallTracking(callTrackingList=None):
         Input factor is a single factor.
         Input eliminationVariable is the variable to eliminate from factor.
         eliminationVariable must be an unconditioned variable in factor.
-        
-        You should calculate the set of unconditioned variables and conditioned 
+
+        You should calculate the set of unconditioned variables and conditioned
         variables for the factor obtained by eliminating the variable
         eliminationVariable.
 
@@ -163,10 +168,10 @@ def eliminateWithCallTracking(callTrackingList=None):
         if eliminationVariable not in factor.unconditionedVariables():
             print("Factor failed eliminate typecheck: ", factor)
             raise ValueError("Elimination variable is not an unconditioned variable " \
-                            + "in this factor\n" + 
+                            + "in this factor\n" +
                             "eliminationVariable: " + str(eliminationVariable) + \
                             "\nunconditionedVariables:" + str(factor.unconditionedVariables()))
-        
+
         if len(factor.unconditionedVariables()) == 1:
             print("Factor failed eliminate typecheck: ", factor)
             raise ValueError("Factor has only one unconditioned variable, so you " \
@@ -175,21 +180,24 @@ def eliminateWithCallTracking(callTrackingList=None):
                     "unconditionedVariables: " + str(factor.unconditionedVariables()))
 
         "*** YOUR CODE HERE ***"
-        unconditioned_eliminate = factor.unconditionedVariables()
-        unconditioned_eliminate.remove(eliminationVariable)
-        reduced_unconditioned = Factor(unconditioned_eliminate, factor.conditionedVariables(), factor.variableDomainsDict())
+        unconditioned = factor.unconditionedVariables()
+        unconditioned.remove(eliminationVariable)
+        conditioned = factor.conditionedVariables()
+        domains = factor.variableDomainsDict()
+        
+        eliminatedVar = Factor(unconditioned, conditioned, domains)
+        for possibleEliminatedAssignments in eliminatedVar.getAllPossibleAssignmentDicts():
+            sumProb = 0
+            
+            for i in factor.variableDomainsDict()[eliminationVariable]:
+                possibleEliminatedAssignments[eliminationVariable] = i
+                sumProb += factor.getProbability(possibleEliminatedAssignments)
+           
+            eliminatedVar.setProbability(possibleEliminatedAssignments, sumProb)
+        return eliminatedVar
+        "*** END YOUR CODE HERE ***"
 
-        for reducedAssign in reduced_unconditioned.getAllPossibleAssignmentDicts():
-            total = 0
-            for eliminationVar in factor.variableDomainsDict()[eliminationVariable]:
-                full = reducedAssign
-                full[eliminationVariable] = eliminationVar
-                total += factor.getProbability(full)
-            reduced_unconditioned.setProbability(reducedAssign, total)
-        return reduced_unconditioned
-    "*** END YOUR CODE HERE ***"
     return eliminate
-
 
 eliminate = eliminateWithCallTracking()
 
